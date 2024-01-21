@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chat</title>
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+	<!-- Font awesome -->
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+	<div class="container-fluid h-100">
+		<div class="row justify-content-center h-100">
+
+			<div class="col-md-8 col-xl-6 chat">
+				<div class="card">
+					<div class="card-header msg_head">
+						<div class="d-flex bd-highlight">
+							<div class="img_cont">
+								<img src="pp.png" class="rounded-circle user_img">
+								<span class="online_icon"></span>
+							</div>
+							<div class="user_info">
+								<span id="SenderName"></span>
+								<!-- <p>1767 Messages</p> -->
+							</div>
+							<div class="video_cam">
+								<!-- <span><i class="fas fa-video"></i></span>
+								<span><i class="fas fa-phone"></i></span> -->
+							</div>
+						</div>
+						<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+						<div class="action_menu">
+							<ul>
+								<!-- <li><i class="fas fa-user-circle"></i> View profile</li>
+								<li><i class="fas fa-users"></i> Add to close friends</li>
+								<li><i class="fas fa-plus"></i> Add to group</li>
+								<li><i class="fas fa-ban"></i> Block</li> -->
+							</ul>
+						</div>
+					</div>
+					<div id="messages" class="card-body msg_card_body">
+
+
+
+
+						<!-- <div class="d-flex justify-content-end mb-4">
+							<div class="msg_cotainer_send">
+								Ok, thank you have a good day
+								<span class="msg_time_send">9:10 AM, Today</span>
+							</div>
+						</div>
+						<div class="d-flex justify-content-start mb-4">
+							<div class="msg_cotainer">
+								Bye, see you
+								<span class="msg_time">9:12 AM, Today</span>
+							</div>
+						</div> -->
+					</div>
+
+
+					<div class="card-footer">
+						<div id="sendMsg" class="input-group">
+							<!-- <div class="input-group-append">
+								<span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+							</div> -->
+
+
+							<input type="text" class="form-control type_msg" id="msgTxt"
+								placeholder="Type your message...">
+
+							<div class="input-group-append">
+								<span class="input-group-text send_btn">
+
+									<button type="submit" id="msgBtn" value="send" onclick="module.sendMsg()" style="
+									border: 0;
+									background: none;
+									color: white;
+									">
+										<i class="fas fa-location-arrow"></i>
+									</button>
+
+
+								</span>
+							</div>
+						</div>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="scripts.js"></script>
+
+	<script>
+		module = {};
+	</script>
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+		import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyDaOwK9gkGrbAYu7lPlIxbrtt2y3qp1mCA",
+			authDomain: "ea-universalchat.firebaseapp.com",
+			databaseURL: "https://ea-universalchat-default-rtdb.europe-west1.firebasedatabase.app",
+			projectId: "ea-universalchat",
+			storageBucket: "ea-universalchat.appspot.com",
+			messagingSenderId: "392048427579",
+			appId: "1:392048427579:web:041a92d1d7cb58c70ad21e"
+		};
+
+		const app = initializeApp(firebaseConfig);
+		const db = getDatabase(app);
+
+		// variables
+		var msgTxt = document.getElementById('msgTxt');
+		var sender;
+		if (sessionStorage.getItem('sender')) {
+			sender = sessionStorage.getItem('sender');
+		} else {
+			sender = prompt('PLEASE ENTER YOUR NAME');
+			sessionStorage.setItem('sender', sender);
+		}
+
+
+		// TO SEND MESSAGES
+		module.sendMsg = function sendMsg() {
+			var msg = msgTxt.value;
+			var timestamp = new Date().getTime();
+			set(ref(db, "messages/" + timestamp), {
+				msg: msg,
+				sender: sender
+			})
+
+			msgTxt.value = "";
+		}
+
+		// TO RECEIVE MSG
+		onChildAdded(ref(db, "messages"), (data) => {
+
+
+
+			if (data.val().sender == sender) {
+				//messages.innerHTML += "<div style=justify-content:end class=outer id=" + data.key + "><div id=inner class=me>you : " + data.val().msg + "<button id=dltMsg onclick=module.dltMsg(" + data.key + ")>DELETE</button></div></div>";
+
+				messages.innerHTML += '<div class="d-flex justify-content-end mb-4" ><div class="msg_cotainer_send" id' + data.key + '>' + data.val().msg + '</div></div>';
+
+
+			} else {
+				document.getElementById('SenderName').innerHTML = data.val().sender;
+
+				messages.innerHTML += '<div class="d-flex justify-content-start mb-4" ><div class="msg_cotainer" id' + data.key + '>' + data.val().msg + '</div></div>';
+
+				// messages.innerHTML += "<div class=outer id=" + data.key + "><div id=inner class=notMe>" + data.val().sender + " : " + data.val().msg + "</div></div>";
+			}
+		})
+
+		// TO DELETE MSG
+		module.dltMsg = function dltMsg(key) {
+			remove(ref(db, "messages/" + key));
+		}
+
+		// WHEN MSG IS DELETED
+		onChildRemoved(ref(db, "messages"), (data) => {
+			var msgBox = document.getElementById(data.key);
+			messages.removeChild(msgBox);
+		})
+	</script>
+</body>
+
+</html>
