@@ -216,7 +216,7 @@
 
 			Object.keys(snapshot.val()).map(user => {
 				if (user != sender) {
-					console.log(snapshot.val()[user].status);
+					//console.log(snapshot.val()[user].status);
 					if (snapshot.val()[user].status == "online") {
 						document.getElementById("onlineDot").style.backgroundColor = "#4cd137";
 					} else {
