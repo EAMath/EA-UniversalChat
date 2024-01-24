@@ -2,7 +2,8 @@
 <html>
 
 <head>
-	<title>Chat</title>
+	<title>Emir-Karo Chat :)</title>
+	<link rel="icon" type="image/x-icon" href="icon.ico">
 	<!-- Bootstrap -->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 	<!-- Font awesome -->
@@ -20,8 +21,8 @@
 					<div class="card-header msg_head">
 						<div class="d-flex bd-highlight">
 							<div class="img_cont">
-								<img src="pp.png" class="rounded-circle user_img">
-								<span class="online_icon"></span>
+								<img id="ProfilePhoto" src="pp.png" class="rounded-circle user_img">
+								<span id="onlineDot" class="online_icon"></span>
 							</div>
 							<div class="user_info">
 								<span id="SenderName"></span>
@@ -44,9 +45,6 @@
 					</div>
 					<div id="messages" class="card-body msg_card_body">
 
-
-
-
 						<!-- <div class="d-flex justify-content-end mb-4">
 							<div class="msg_cotainer_send">
 								Ok, thank you have a good day
@@ -59,6 +57,7 @@
 								<span class="msg_time">9:12 AM, Today</span>
 							</div>
 						</div> -->
+						<!-- <div id="anchor"></div> -->
 					</div>
 
 
@@ -69,8 +68,9 @@
 							</div> -->
 
 
-							<input type="text" class="form-control type_msg" id="msgTxt"
-								placeholder="Type your message...">
+
+							<input onkeypress="module.handleEnter(event)" type="text" class="form-control type_msg"
+								id="msgTxt" placeholder="Type your message...">
 
 							<div class="input-group-append">
 								<span class="input-group-text send_btn">
@@ -83,14 +83,18 @@
 										<i class="fas fa-location-arrow"></i>
 									</button>
 
-
 								</span>
 							</div>
 						</div>
-
-
 					</div>
 				</div>
+
+				<div class="infoText">
+					<p>„Enter“ hinzugefügt, um eine Nachricht zu senden :)</p>
+					<p>Online-Offline-Status hinzugefügt</p>
+					<p>Automatisches Herunterscrollen hinzugefügt, wenn die Nachricht empfangen wird</p>
+				</div>
+
 			</div>
 		</div>
 	</div>
@@ -98,12 +102,14 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script type="text/javascript" src="scripts.js"></script>
 
+
+
 	<script>
 		module = {};
 	</script>
 	<script type="module">
 		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-		import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+		import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
 		const firebaseConfig = {
 			apiKey: "AIzaSyDaOwK9gkGrbAYu7lPlIxbrtt2y3qp1mCA",
@@ -121,30 +127,53 @@
 		// variables
 		var msgTxt = document.getElementById('msgTxt');
 		var sender;
-		if (sessionStorage.getItem('sender')) {
-			sender = sessionStorage.getItem('sender');
+		var reciver;
+		if (localStorage.getItem('sender')) {
+			sender = localStorage.getItem('sender');
 		} else {
-			sender = prompt('PLEASE ENTER YOUR NAME');
-			sessionStorage.setItem('sender', sender);
+			sender = prompt('Bitte geben Sie Ihren Namen ein');
+			localStorage.setItem('sender', sender);
 		}
 
 
+		// ref("OnlineStatus").on("value", function (snapshot) {
+		// 	snapshot.forEach(function (element) {
+		// 		console.log(element.status);
+		// 	})
+		// })
+
+
+
+
+		// Pressin Enter
+		module.handleEnter = function handleEnter(e) {
+			if (e.keyCode === 13) {
+				module.sendMsg();
+			}
+
+		}
+
 		// TO SEND MESSAGES
 		module.sendMsg = function sendMsg() {
-			var msg = msgTxt.value;
-			var timestamp = new Date().getTime();
-			set(ref(db, "messages/" + timestamp), {
-				msg: msg,
-				sender: sender
-			})
+			var msg = msgTxt.value.trim();
 
-			msgTxt.value = "";
+
+			if (msg.length > 0) {
+
+				var timestamp = new Date().getTime();
+				set(ref(db, "messages/" + timestamp), {
+					msg: msg,
+					sender: sender
+				})
+
+				msgTxt.value = "";
+
+				document.getElementById("messages").scrollTo({ top: (5000), behavior: 'smooth' })
+			}
 		}
 
 		// TO RECEIVE MSG
 		onChildAdded(ref(db, "messages"), (data) => {
-
-
 
 			if (data.val().sender == sender) {
 				//messages.innerHTML += "<div style=justify-content:end class=outer id=" + data.key + "><div id=inner class=me>you : " + data.val().msg + "<button id=dltMsg onclick=module.dltMsg(" + data.key + ")>DELETE</button></div></div>";
@@ -154,12 +183,21 @@
 
 			} else {
 				document.getElementById('SenderName').innerHTML = data.val().sender;
+				reciver = data.val().sender;
+				data.val().sender == "Emir" ? document.getElementById('ProfilePhoto').src = "EaPng.png" : "";
+
 
 				messages.innerHTML += '<div class="d-flex justify-content-start mb-4" ><div class="msg_cotainer" id' + data.key + '>' + data.val().msg + '</div></div>';
 
 				// messages.innerHTML += "<div class=outer id=" + data.key + "><div id=inner class=notMe>" + data.val().sender + " : " + data.val().msg + "</div></div>";
 			}
+
+			setTimeout(() => {
+				document.getElementById("messages").scrollTo({ top: (5000), behavior: 'smooth' })
+			}, 100);
 		})
+
+
 
 		// TO DELETE MSG
 		module.dltMsg = function dltMsg(key) {
@@ -171,6 +209,41 @@
 			var msgBox = document.getElementById(data.key);
 			messages.removeChild(msgBox);
 		})
+
+
+
+		onValue(ref(db, "OnlineStatus/"), (snapshot) => {
+
+			Object.keys(snapshot.val()).map(user => {
+				if (user != sender) {
+					console.log(snapshot.val()[user].status);
+					if (snapshot.val()[user].status == "online") {
+						document.getElementById("onlineDot").style.backgroundColor = "#4cd137";
+					} else {
+						document.getElementById("onlineDot").style.backgroundColor = "#676767";
+					}
+				}
+			});
+
+		});
+
+
+		window.addEventListener("load", function (e) {
+			set(ref(db, "OnlineStatus/" + sender), {
+				status: "online"
+			})
+		});
+
+		window.addEventListener("beforeunload", function (e) {
+			var confirmationMessage = "\o/";
+
+			set(ref(db, "OnlineStatus/" + sender), {
+				status: "offline"
+			})
+
+				(e || window.event).returnValue = confirmationMessage;
+			return confirmationMessage;
+		});
 	</script>
 </body>
 

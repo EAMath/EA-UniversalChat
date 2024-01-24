@@ -18,6 +18,11 @@ html {
 	background-color: rgba(0, 0, 0, 0.4) !important;
 }
 
+.card-body{
+	
+	padding: 3;
+}
+
 .contacts_body {
 	padding: 0.75rem 0 !important;
 	overflow-y: auto;
@@ -129,11 +134,23 @@ html {
 	width: 40px;
 }
 
+.infoText{
+	transform: perspective(1000px) rotateX(0deg) rotateY(40deg);
+	margin-top: 1.5rem;
+}
+
+.infoText p{
+	color: white;
+	margin: 0;
+	text-decoration: overline;
+    font-style: italic;
+}
+
 .online_icon {
 	position: absolute;
 	height: 15px;
 	width: 15px;
-	background-color: #4cd137;
+	background-color: #676767;
 	border-radius: 50%;
 	bottom: 13px;
 	right: 13px;
@@ -171,6 +188,15 @@ html {
 	cursor: pointer;
 	margin-right: 20px;
 }
+
+/* #messages{
+	overflow-anchor: none;
+}
+
+#anchor{
+	overflow-anchor: auto;
+	height: 1px; 
+}*/
 
 .msg_cotainer {
 	margin-top: auto;
