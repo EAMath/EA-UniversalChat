@@ -89,12 +89,12 @@
 					</div>
 				</div>
 
-				<div class="infoText">
+				<!-- <div class="infoText">
 					<p>- Online-Offline-Status hinzugefügt</p>
 					<p>- „Enter“ hinzugefügt, um eine Nachricht zu senden :)</p>
 					<p>- Sie müssen nicht bei jedem Eingang Ihren Namen eingeben</p>
 					<p>- Automatisches Herunterscrollen hinzugefügt, wenn die Nachricht empfangen wird</p>
-				</div>
+				</div> -->
 
 			</div>
 		</div>
@@ -136,22 +136,13 @@
 			localStorage.setItem('sender', sender);
 		}
 
-
-		// ref("OnlineStatus").on("value", function (snapshot) {
-		// 	snapshot.forEach(function (element) {
-		// 		console.log(element.status);
-		// 	})
-		// })
-
-
-
+		var audio = new Audio('NotificationEffect.mp3');
 
 		// Pressin Enter
 		module.handleEnter = function handleEnter(e) {
 			if (e.keyCode === 13) {
 				module.sendMsg();
 			}
-
 		}
 
 		// TO SEND MESSAGES
@@ -188,12 +179,16 @@
 				data.val().sender == "Emir" ? document.getElementById('ProfilePhoto').src = "EaPng.png" : "";
 
 
+
 				messages.innerHTML += '<div class="d-flex justify-content-start mb-4" ><div class="msg_cotainer" id' + data.key + '>' + data.val().msg + '</div></div>';
 
 				// messages.innerHTML += "<div class=outer id=" + data.key + "><div id=inner class=notMe>" + data.val().sender + " : " + data.val().msg + "</div></div>";
+
+				audio.play();
 			}
 
 			setTimeout(() => {
+
 				document.getElementById("messages").scrollTo({ top: (5000), behavior: 'smooth' })
 			}, 100);
 		})
@@ -212,7 +207,7 @@
 		})
 
 
-
+		// Online-Ofline State
 		onValue(ref(db, "OnlineStatus/"), (snapshot) => {
 
 			Object.keys(snapshot.val()).map(user => {
@@ -227,7 +222,6 @@
 			});
 
 		});
-
 
 		window.addEventListener("load", function (e) {
 			set(ref(db, "OnlineStatus/" + sender), {
@@ -245,6 +239,26 @@
 				(e || window.event).returnValue = confirmationMessage;
 			return confirmationMessage;
 		});
+
+
+		// Desktop Notifications
+
+		// function showNotification() {
+		// 	const notification = new Notification("New message from Emir", {
+		// 		body: "Testing Notifications :)"
+		// 	});
+		// }
+
+		// console.log(Notification.permission);
+
+		// if (Notification.permission === "granted") {
+		// 	showNotification();
+		// } else if (Notification.permission !== "denied") {
+		// 	Notification.requestPermission().then(permission => {
+		// 		showNotification();
+		// 	})
+		// }
+
 	</script>
 </body>
 
